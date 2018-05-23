@@ -247,7 +247,8 @@ ngx_http_aws_auth_get_canon_headers(ngx_http_request_t *r, ngx_str_t *retstr) {
     ngx_array_t       *v;
     ngx_list_part_t   *part;
     ngx_table_elt_t   *header, *el, *h;
-    ngx_uint_t        i, ch, lenall, offset;
+    //ngx_uint_t        i, ch, lenall, offset;
+    ngx_uint_t        i, lenall, offset;
 
     part = &r->headers_in.headers.part;
     header = part->elts;
@@ -259,45 +260,46 @@ ngx_http_aws_auth_get_canon_headers(ngx_http_request_t *r, ngx_str_t *retstr) {
     }
 
     lenall = 0;
-    for (i = 0; /* void */ ; i++) {
-        if (i >= part->nelts) {
-            if (part->next == NULL) {
-                break;
-            }
-            part = part->next;
-            header = part->elts;
-            i = 0;
-        }
+    //for (i = 0; /* void */ ; i++) {
+    //    if (i >= part->nelts) {
+    //        if (part->next == NULL) {
+    //            break;
+    //        }
+    //        part = part->next;
+    //        header = part->elts;
+    //        i = 0;
+    //    }
 
-        if (header[i].hash == 0) {
-            continue;
-        }
+    //    if (header[i].hash == 0) {
+    //        continue;
+    //    }
 
-        if (ngx_strncasecmp(header[i].key.data, (u_char *) "x-amz-",  sizeof("x-amz-") - 1) == 0) {
-            h = ngx_array_push(v);
-            if (h == NULL) {
-                return NGX_ERROR;
-            }
-            h->key.data = ngx_palloc(r->pool, header[i].key.len);
-            for (ch = 0; ch < header[i].key.len; ch++) {
-                h->key.data[ch] = ngx_tolower(header[i].key.data[ch]);
-            }
-            h->key.len  = header[i].key.len;
-            h->value.data  = header[i].value.data;
-            h->value.len  = header[i].value.len;
-            lenall += h->key.len + h->value.len + 2;
-            ngx_log_error(NGX_LOG_DEBUG, r->connection->log, 0,
-                "x-amz header key: %V; val: %V ",&h->key, &h->value);
-            continue;
-        }
-    }
+    //    if (ngx_strncasecmp(header[i].key.data, (u_char *) "x-amz-",  sizeof("x-amz-") - 1) == 0) {
+    //        h = ngx_array_push(v);
+    //        if (h == NULL) {
+    //            return NGX_ERROR;
+    //        }
+    //        h->key.data = ngx_palloc(r->pool, header[i].key.len);
+    //        for (ch = 0; ch < header[i].key.len; ch++) {
+    //            h->key.data[ch] = ngx_tolower(header[i].key.data[ch]);
+    //        }
+    //        h->key.len  = header[i].key.len;
+    //        h->value.data  = header[i].value.data;
+    //        h->value.len  = header[i].value.len;
+    //        lenall += h->key.len + h->value.len + 2;
+    //        ngx_log_error(NGX_LOG_DEBUG, r->connection->log, 0,
+    //            "x-amz header key: %V; val: %V ",&h->key, &h->value);
+    //        continue;
+    //    }
+    //}
 
     h = ngx_array_push(v);
     if (h == NULL) {
         return NGX_ERROR;
     }
 
-    ngx_str_t amz_date = ngx_string("x-amz-date");
+    //ngx_str_t amz_date = ngx_string("x-amz-date");
+    ngx_str_t amz_date = ngx_string("application/x-compressed-tar\n");
     u_char * val  = ngx_palloc(r->pool, ngx_cached_http_time.len + 1);
     ngx_memcpy(val, ngx_cached_http_time.data, ngx_cached_http_time.len);
     h->key.data = amz_date.data;
@@ -315,8 +317,8 @@ ngx_http_aws_auth_get_canon_headers(ngx_http_request_t *r, ngx_str_t *retstr) {
     for (i = 0; i < v->nelts ; i++) {
         ngx_memcpy(ret + offset, el[i].key.data, el[i].key.len);
         offset += el[i].key.len;
-        ngx_memcpy(ret + offset, (u_char *)":", 1);
-        offset += 1;
+        //ngx_memcpy(ret + offset, (u_char *)":", 1);
+        //offset += 1;
         ngx_memcpy(ret + offset, el[i].value.data, el[i].value.len);
         offset += el[i].value.len;
         ngx_memcpy(ret + offset, (u_char *)"\n", 1);
@@ -511,46 +513,46 @@ ngx_http_aws_auth_variable_s3(ngx_http_request_t *r, ngx_http_variable_value_t *
     if (val == NULL) {
         return NGX_ENOMEM;
     }
-    ngx_str_t h_name = ngx_string("http_content_md5");
-    if (ngx_http_variable_unknown_header(val, &h_name, &r->headers_in.headers.part, sizeof("http_")-1) == NGX_OK){
-        if (val->not_found == 0) {
-            ngx_log_error(NGX_LOG_DEBUG, r->connection->log, 0, "Content-MD5: %s", val->data);
-            el_sign = ngx_array_push(to_sign);
-            if (el_sign == NULL) {
-                return NGX_ERROR;
-            }
-            el_sign->data = val->data;
-            el_sign->len  = val->len;
-            lenall += el_sign->len;
-        }
-    }
+    //ngx_str_t h_name = ngx_string("http_content_md5");
+    //if (ngx_http_variable_unknown_header(val, &h_name, &r->headers_in.headers.part, sizeof("http_")-1) == NGX_OK){
+    //    if (val->not_found == 0) {
+    //        ngx_log_error(NGX_LOG_DEBUG, r->connection->log, 0, "Content-MD5: %s", val->data);
+    //        el_sign = ngx_array_push(to_sign);
+    //        if (el_sign == NULL) {
+    //            return NGX_ERROR;
+    //        }
+    //        el_sign->data = val->data;
+    //        el_sign->len  = val->len;
+    //        lenall += el_sign->len;
+    //    }
+    //}
 
-    ngx_http_aws_auth_sgn_newline(to_sign);
+    //ngx_http_aws_auth_sgn_newline(to_sign);
 
-    if (r->headers_in.content_type != NULL) {
-        ngx_log_error(NGX_LOG_DEBUG, r->connection->log, 0, "content-type: %V", &r->headers_in.content_type->value);
-        el_sign = ngx_array_push(to_sign);
-        if (el_sign == NULL) {
-            return NGX_ERROR;
-        }
-        el_sign->data = r->headers_in.content_type->value.data;
-        el_sign->len  = r->headers_in.content_type->value.len;
-        lenall += el_sign->len;
-    }
-    ngx_http_aws_auth_sgn_newline(to_sign);
-    ngx_str_t h_date = ngx_string("http_date");
-    if (ngx_http_variable_unknown_header(val, &h_date, &r->headers_in.headers.part, sizeof("http_")-1) == NGX_OK) {
-        if (val->not_found == 0) {
-            ngx_log_error(NGX_LOG_DEBUG, r->connection->log, 0, "Date: %s", val->data);
-            el_sign = ngx_array_push(to_sign);
-            if (el_sign == NULL) {
-                return NGX_ERROR;
-            }
-            el_sign->data = val->data;
-            el_sign->len  = val->len;
-            lenall += el_sign->len;
-        }
-    }
+    //if (r->headers_in.content_type != NULL) {
+    //    ngx_log_error(NGX_LOG_DEBUG, r->connection->log, 0, "content-type: %V", &r->headers_in.content_type->value);
+    //    el_sign = ngx_array_push(to_sign);
+    //    if (el_sign == NULL) {
+    //        return NGX_ERROR;
+    //    }
+    //    el_sign->data = r->headers_in.content_type->value.data;
+    //    el_sign->len  = r->headers_in.content_type->value.len;
+    //    lenall += el_sign->len;
+    //}
+    //ngx_http_aws_auth_sgn_newline(to_sign);
+    //ngx_str_t h_date = ngx_string("http_date");
+    //if (ngx_http_variable_unknown_header(val, &h_date, &r->headers_in.headers.part, sizeof("http_")-1) == NGX_OK) {
+    //    if (val->not_found == 0) {
+    //        ngx_log_error(NGX_LOG_DEBUG, r->connection->log, 0, "Date: %s", val->data);
+    //        el_sign = ngx_array_push(to_sign);
+    //        if (el_sign == NULL) {
+    //            return NGX_ERROR;
+    //        }
+    //        el_sign->data = val->data;
+    //        el_sign->len  = val->len;
+    //        lenall += el_sign->len;
+    //    }
+    //}
 
     ngx_http_aws_auth_sgn_newline(to_sign);
 
