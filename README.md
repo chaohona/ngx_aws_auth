@@ -1,3 +1,5 @@
+s3协议使用AuthV2分支
+
 # AWS proxy module
 
 [![Build Status](https://travis-ci.org/anomalizer/ngx_aws_auth.svg?branch=master)](https://travis-ci.org/anomalizer/ngx_aws_auth)
