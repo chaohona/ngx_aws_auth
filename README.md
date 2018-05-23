@@ -1,6 +1,7 @@
+```
 s3协议使用AuthV2分支
 ./configure --prefix=/usr/local/nginx --with-pcre=../pcre-8.42 --with-zlib=../zlib-1.2.11 --add-module=../ngx_aws_auth-AuthV2 --with-http_ssl_module --add-module=../nginx-openssl-version-0.04 --with-http_ssl_module --with-pcre
-
+```
 # AWS proxy module
 
 [![Build Status](https://travis-ci.org/anomalizer/ngx_aws_auth.svg?branch=master)](https://travis-ci.org/anomalizer/ngx_aws_auth)
